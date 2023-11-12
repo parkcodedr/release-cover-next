@@ -1,0 +1,30 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Release {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  artist             String
+  release_name       String
+  spotify_listener   String
+  instagram_follower String
+  twitter_follower   String
+  music_heroes       String
+  current_listening  String
+  album_talk         String
+  monthly_listener   String
+  social_followers   String
+  chat_performance   String
+  bg_color           String
+  text_color         String
+  createdAt          DateTime @default(now())
+  updateAt           DateTime @updatedAt
+}

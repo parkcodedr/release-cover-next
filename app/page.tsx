@@ -19,9 +19,11 @@ import FroalaEditor from "react-froala-wysiwyg";
 import "froala-editor/css/froala_style.min.css";
 import "froala-editor/css/froala_editor.pkgd.min.css";
 import { FileUploader } from "react-drag-drop-files";
+import axios from "axios";
 
 const Home: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
   const fileTypes = ["JPG", "PNG", "GIF"];
   const [biography, setBiography] = useState<string>("");
   const [know, setKnow] = useState<string>("");
@@ -77,8 +79,17 @@ const Home: React.FC = () => {
     setFile(files);
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+    try {
+      if (!file || file === null) throw new Error("No image selected");
+      let data = new FormData();
+      const result = await axios.post("/api/release", values);
+      console.log({ result });
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
   }
   console.log({ biography });
 
@@ -367,7 +378,9 @@ const Home: React.FC = () => {
           </main>
 
           <div className="flex justify-end">
-            <Button type="submit">Submit</Button>
+            <Button type="submit" disabled={loading}>
+              Submit
+            </Button>
           </div>
         </form>
       </Form>
