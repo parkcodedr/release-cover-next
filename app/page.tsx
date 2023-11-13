@@ -20,13 +20,18 @@ import "froala-editor/css/froala_style.min.css";
 import "froala-editor/css/froala_editor.pkgd.min.css";
 import { FileUploader } from "react-drag-drop-files";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useFormPreview } from "@/context/PreviewContext";
 
 const Home: React.FC = () => {
+  const { formState, setFormState } = useFormPreview();
   const [file, setFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState("");
   const [loading, setLoading] = useState(false);
   const fileTypes = ["JPG", "PNG", "GIF"];
   const [biography, setBiography] = useState<string>("");
   const [know, setKnow] = useState<string>("");
+  const router = useRouter();
 
   const handleKnowChange = (model: string) => {
     setKnow(model);
@@ -54,6 +59,7 @@ const Home: React.FC = () => {
     chat_performance: z.string().min(1, { message: "Field is required" }),
     bg_color: z.string().min(1, { message: "Field is required" }),
     text_color: z.string().min(1, { message: "Field is required" }),
+    music_quote:z.string(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -72,11 +78,13 @@ const Home: React.FC = () => {
       chat_performance: "",
       bg_color: "",
       text_color: "",
+      music_quote:""
     },
   });
 
   const handleDrop = (files: File) => {
     setFile(files);
+    setSelectedFile(URL.createObjectURL(files));
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -85,7 +93,10 @@ const Home: React.FC = () => {
       if (!file || file === null) throw new Error("No image selected");
       let data = new FormData();
       const result = await axios.post("/api/release", values);
-      console.log({ result });
+      if (result) {
+        setFormState({ ...values, selectedFile, biography, know });
+        router.push("/preview");
+      }
     } catch (error) {
     } finally {
       setLoading(false);
@@ -216,7 +227,26 @@ const Home: React.FC = () => {
               <FormMessage />
             </FormItem>
 
-            <section className="grid grid-cols-1 md:grid-cols-2 mb-2 gap-6">
+            <section className="grid grid-cols-1 md:grid-cols-3 mb-2 gap-6">
+            <FormField
+                control={form.control}
+                name="music_quote"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="my-3">
+                      {" "}
+                      <FormLabel>Music Quote</FormLabel>
+                    </div>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter music quote"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="music_heroes"
@@ -384,6 +414,10 @@ const Home: React.FC = () => {
           </div>
         </form>
       </Form>
+      <div
+        className="w-full h-52 bg-cover bg-center mt-10"
+        style={{ backgroundImage: `url(${selectedFile})` }}
+      ></div>
     </main>
   );
 };

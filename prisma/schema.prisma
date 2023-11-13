@@ -11,7 +11,7 @@ datasource db {
 }
 
 model Release {
-  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                 String @db.ObjectId @id @default(auto()) @map("_id") 
   artist             String
   release_name       String
   spotify_listener   String
